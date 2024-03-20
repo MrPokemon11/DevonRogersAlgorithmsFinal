@@ -2,9 +2,41 @@
 //
 
 #include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <fstream>
+
+using namespace std;
+
+struct network {
+    char ID;
+    vector<char> connections;
+    vector<int> weights;
+    bool isChargingStation;
+
+    network* link;
+};
+
+bool loadNetwork() {
+
+    string networkDat;
+    ifstream networkFile("DevonRogersAlgorithmsFinalSpreadsheet.csv");
+
+    if (networkFile.ifstream::is_open()) {
+
+    }
+    else {
+        cout << "Network not found!\n";
+    }
+
+}
 
 int main()
 {
+
+
     std::cout << "Hello World!\n";
 }
 
