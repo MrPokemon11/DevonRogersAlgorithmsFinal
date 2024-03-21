@@ -22,4 +22,7 @@
   <ItemGroup>
     <Text Include="NetworkCSV.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="DevonRogersAlgorithmsFinalSpreadsheet.csv" />
+  </ItemGroup>
 </Project>
