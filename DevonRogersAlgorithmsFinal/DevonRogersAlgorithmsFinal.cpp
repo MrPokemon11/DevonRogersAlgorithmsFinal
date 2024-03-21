@@ -18,7 +18,7 @@ struct node {
     bool isChargingStation;
     int shortestDistFromSource = -1;//shortest distance from source; make sure that the source is equal to 0!
         //costs for unvisited nodes are initially -1, aka infinity
-    node* prevFromSource; //previous node; set at the same time as shortestDistFromSource
+    node* prevNode; //previous node; set at the same time as shortestDistFromSource
 };
 
 /*
@@ -44,7 +44,16 @@ bool loadNetwork() {
     ifstream networkFile("DevonRogersAlgorithmsFinalSpreadsheet.csv");
 
     if (networkFile.ifstream::is_open()) {
+        //do file loading
 
+        char nodeID;
+        //set nodeID to the current node ID pulled from the stream
+        if (nodeID == 'H' || nodeID == 'K' || nodeID == 'Q' || nodeID == 'T') {
+            //make it a charging station
+        }
+        else {
+            //make it not a charging station
+        }
     }
     else {
         cout << "Network not found!\n";
@@ -63,12 +72,16 @@ void djAlgorithm() {
     //check
     if (currCost < bestCost || isUnvisited) {
         bestCost = currCost;//since this is the shortest path so far, make it the best cost
+
+        //update the value of prevNode
     }
 }
 
 int main()
 {
+    //get source node
 
+    //if the source node *is* a charging station, you still need to find the distance to the other 3 '-_-
 
     std::cout << "Hello World!\n";
 }
