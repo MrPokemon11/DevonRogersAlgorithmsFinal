@@ -10,14 +10,33 @@
 
 using namespace std;
 
+//create vectors with visited and unvisited nodes (follow Lecture 9)
+
+struct node {
+    char id;
+    //the character A is 65; make nodes using for loop
+    bool isChargingStation;
+    int shortestDistFromSource = -1;//shortest distance from source; make sure that the source is equal to 0!
+        //costs for unvisited nodes are initially -1, aka infinity
+    node* prevFromSource; //previous node; set at the same time as shortestDistFromSource
+};
+
+/*
+Plan:
+- have network be linked list of nodes?
+    - 
+*/
+
 struct network {
     char ID;
+
     vector<char> connections;
     vector<int> weights;
-    bool isChargingStation;
 
     network* link;
 };
+
+
 
 bool loadNetwork() {
 
@@ -31,6 +50,20 @@ bool loadNetwork() {
         cout << "Network not found!\n";
     }
 
+}
+
+//dijkstra's algorithm; i just don't want to type that every time
+void djAlgorithm() {
+    int currCost = 0;//the total weights of the edges to reach the current node 
+    int bestCost = -1;
+    bool isUnvisited = false;
+    //if a node is unvisited, make the shortest distance -1
+
+
+    //check
+    if (currCost < bestCost || isUnvisited) {
+        bestCost = currCost;//since this is the shortest path so far, make it the best cost
+    }
 }
 
 int main()
