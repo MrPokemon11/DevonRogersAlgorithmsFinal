@@ -31,7 +31,7 @@ struct node {
 /*
 Plan:
 - have network be linked list of nodes?
-    -
+- alternatively: store the nodes in a vector, and use the ID to get the index of a given node
 */
 
 struct network {
