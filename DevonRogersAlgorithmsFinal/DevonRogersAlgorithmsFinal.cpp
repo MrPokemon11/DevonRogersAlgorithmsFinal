@@ -61,6 +61,8 @@ bool loadNetwork() {
 
 }
 
+//reminder to self: look at the pseudocode in lecture 10, should be very helpful
+
 //dijkstra's algorithm; i just don't want to type that every time
 void djAlgorithm() {
     int currCost = 0;//the total weights of the edges to reach the current node 
