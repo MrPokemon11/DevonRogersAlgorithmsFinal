@@ -29,9 +29,9 @@ struct node {
     char id;
     //the character A is 65; make nodes using for loop
     bool isChargingStation;
-    int shortestDistFromSource = -1;//shortest distance from source; make sure that the source is equal to 0!
-        //costs for unvisited nodes are initially -1, and later set to infinity
-    char prevNode; //previous node; set at the same time as shortestDistFromSource
+    int shortestDistFromSource = 999999;//shortest distance from source; make sure that the source is equal to 0!
+        //costs for unvisited nodes are initially infinity
+    char prevNode; //id of previous node; set at the same time as shortestDistFromSource
 };
 
 //the edges from one node to another and its weight
@@ -162,19 +162,23 @@ bool loadNetwork() {
 
 //dijkstra's algorithm; i just don't want to type that every time
 void djAlgorithm(char startPoint) {
+    cout << "Algorithm started, please wait...\n";
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
+
     //create vectors with visited and unvisited nodes (follow Lecture 9)
     vector<char> visited; //the set of visited vertices (initially empty)
     vector<char> unvisited; //the queue
 
     for (int i = 0; i < 23; i++) {
         //initialize the vector of unvisited nodes
-        unvisited.push_back(IDToChar(i)); //the queue initially contains all vertices
+        unvisited.push_back(i+65); //the queue initially contains all vertices
 
         if (IDToChar(i) == startPoint) {
             networkGraph[i]->shortestDistFromSource = 0; //distance to source vertex is 0
         }
         else {
-            networkGraph[i]->shortestDistFromSource = INFINITY; // set all other distances to infinity (aka -1)
+            networkGraph[i]->shortestDistFromSource = 999999; // set all other distances to 999999 (a ridiculously high number, because INFINITY wasn't cooperating
         }
     }
     //while the queue is not empty
@@ -182,9 +186,9 @@ void djAlgorithm(char startPoint) {
 
         //select the element of [unvisited] with the min. distance
 
-        int nextEle;//the index of unvisited that the next element resides at
-        int currMinDist = INFINITY;
-        for (auto t : unvisited) {
+        int nextEle = NULL;//the index of unvisited that the next element resides at
+        int currMinDist = 999999;
+        for (int t = 0; t < unvisited.size(); t++) {
             int distTest = networkGraph[charToID(unvisited[t])]->shortestDistFromSource;
             if (distTest < currMinDist) {
                 currMinDist = distTest;
@@ -211,15 +215,22 @@ void djAlgorithm(char startPoint) {
                 networkGraph[charToID(adjCurr->id)]->shortestDistFromSource = networkGraph[charToID(unvisited[nextEle])]->shortestDistFromSource + adjCurr->cost;
                 //update the previous vertex
                 networkGraph[charToID(adjCurr->id)]->prevNode = networkGraph[charToID(unvisited[nextEle])]->id;
-                adjCurr = adjCurr->link;
+                
             }
-
+            adjCurr = adjCurr->link;
         }
         
         //we won't visit [nextEle] again
         unvisited.erase(unvisited.begin() + nextEle);
         
     }
+
+    end = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+    cout << "Algorithm finished! Time taken: " << elapsed_seconds.count() << "s.\n";
 }
 
 //prints all data from the csv file
@@ -244,6 +255,41 @@ void printStationCosts(char start) {
     cout << "K: " << networkGraph[charToID('K')]->shortestDistFromSource << endl;
     cout << "Q: " << networkGraph[charToID('Q')]->shortestDistFromSource << endl;
     cout << "T: " << networkGraph[charToID('T')]->shortestDistFromSource << endl;
+    cout << endl;
+}
+
+void printMostEfficientRoute() {
+    char mostEfficient = 'H';
+    char stations[] = { 'K', 'Q', 'T' };
+    for (int n = 0; n < 3; n++) {
+        //if the shortest distance from the source to the current most efficient is greater than that of the station at index n in stations, set mostEfficient to the station at index n
+        int netIndex = charToID(stations[n]);
+        if (networkGraph[charToID(mostEfficient)]->shortestDistFromSource > networkGraph[netIndex]->shortestDistFromSource) {
+            mostEfficient = stations[n];
+        }
+    }
+
+    vector<char> mostEfficientRoute;
+    mostEfficientRoute.push_back(mostEfficient);
+    int distCheck = networkGraph[charToID(mostEfficient)]->shortestDistFromSource;
+    do {
+        char curr = mostEfficientRoute.back();
+        char next = networkGraph[charToID(curr)]->prevNode;
+
+        mostEfficientRoute.push_back(next);
+
+        distCheck = networkGraph[charToID(next)]->shortestDistFromSource;
+    } while (distCheck > 0);
+
+    cout << "Most efficient route: ";
+
+    for (auto it = mostEfficientRoute.rbegin(); it != mostEfficientRoute.rend(); it++) {
+        if (it != mostEfficientRoute.rbegin()) {
+            cout << " -> ";
+        }
+        cout << *it;
+    }
+    cout << endl;
 }
 
 int main()
@@ -277,6 +323,8 @@ int main()
 
         //print the cost to travel from the starting node to each charging station
         printStationCosts(ans);
+
+        printMostEfficientRoute();
 
         //if the user is done, end the program
         cout << "Would you like to test another starting point? Y/N ";
