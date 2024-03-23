@@ -12,6 +12,20 @@
 
 using namespace std;
 
+//convert a given character into an index
+int charToID(char in) {
+    in = toupper(in);
+    int out = in - 65;
+    return out;
+}
+
+//convert a given index to a character
+char IDToChar(int in) {
+    char out = in + 65;
+    return out;
+}
+
+
 //create vectors with visited and unvisited nodes (follow Lecture 9)
 vector<char> visited;
 vector<char> unvisited;
@@ -22,7 +36,7 @@ struct node {
     bool isChargingStation;
     int shortestDistFromSource = -1;//shortest distance from source; make sure that the source is equal to 0!
         //costs for unvisited nodes are initially -1, aka infinity
-    node* prevNode; //previous node; set at the same time as shortestDistFromSource
+    node* prevNode = nullptr; //previous node; set at the same time as shortestDistFromSource
 };
 
 //the edges from one node to another and its weight
@@ -50,6 +64,7 @@ struct network {
 
 //adjacency list
 adjNode *adjacencyList[23];
+node* graph[23];
 
 bool checkIsCharger(char nodeID) {
     //set nodeID to the current node ID pulled from the stream
@@ -64,8 +79,9 @@ bool checkIsCharger(char nodeID) {
 }
 
 adjNode* adjFirst, * adjLast, * newAdj, *adjCurr;
+node* newNode;
 
-void loadNetwork() {
+bool loadNetwork() {
 
     string networkDat;
     ifstream networkFile("DevonRogersAlgorithmsFinalSpreadsheet.csv");
@@ -77,7 +93,7 @@ void loadNetwork() {
 
         while (getline(networkFile,networkDat)) {
 
-            //newAdj = new adjNode;
+            newNode = new node;
 
             vector<string> tempArray;
             vector<char> adjTemp;
@@ -102,6 +118,10 @@ void loadNetwork() {
                 costTemp.push_back(stoi(w));
             }
 
+            newNode->id = tempArray[0][0];
+            newNode->isChargingStation = checkIsCharger(tempArray[0][0]);
+
+            graph[currentLine] = newNode;
 
             for (int i = 0; i < adjTemp.size();i++) {
                 newAdj = new adjNode;
@@ -135,8 +155,9 @@ void loadNetwork() {
     }
     else {
         cout << "Network file not found!\n";
+        return false;
     }
-
+    return true;
 }
 
 //reminder to self: look at the pseudocode in lecture 10, should be very helpful
@@ -181,15 +202,17 @@ void printData() {
 
 int main()
 {
+    bool isLoaded = false;
+
     //load network
-    loadNetwork();
+    isLoaded = loadNetwork();
 
     //debug: print the network
     printData();
 
 
     bool running = true;
-    while (running) {
+    while (running && isLoaded) {
      //get source node
         cout << "Please enter the starting point: ";
         char ans;
@@ -198,16 +221,28 @@ int main()
         ans = toupper(ans);
         if (ans < 'A' || ans > 'W') {
             cout << "That's is not a valid node! Valid nodes are anything from A to W.\n";
+            continue;
         }
 
+        //note: if the source node *is* a charging station, you still need to find the distance to the other 3 '-_-
+
+        //run djikstra's algorithm
+        djAlgorithm(ans);
+
+        //if the user is done, end the program
+        cout << "Would you like to test another starting point? Y/N ";
+        cin >> ans;
+        if (toupper(ans) != 'y') {
+            running = false;
+        }
+    }
+    if (isLoaded) {
+        std::cout << "See you next time!\n";
+    }
+    else {
+        cout << "Make sure that DevonRogersAlgorithmsFinalSpreadsheet.csv exists and please try again.\n";
     }
 
-   
-
-
-    //if the source node *is* a charging station, you still need to find the distance to the other 3 '-_-
-
-    std::cout << "See you next time!\n";
 }
 
 /* Personal notes
