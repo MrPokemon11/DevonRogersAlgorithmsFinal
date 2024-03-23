@@ -19,6 +19,8 @@ int charToID(char in) {
     return out;
 }
 
+// \/ potentially unneeded? /\
+
 //convert a given index to a character
 char IDToChar(int in) {
     char out = in + 65;
@@ -26,17 +28,15 @@ char IDToChar(int in) {
 }
 
 
-//create vectors with visited and unvisited nodes (follow Lecture 9)
-vector<char> visited;
-vector<char> unvisited;
+
 
 struct node {
     char id;
     //the character A is 65; make nodes using for loop
     bool isChargingStation;
     int shortestDistFromSource = -1;//shortest distance from source; make sure that the source is equal to 0!
-        //costs for unvisited nodes are initially -1, aka infinity
-    node* prevNode = nullptr; //previous node; set at the same time as shortestDistFromSource
+        //costs for unvisited nodes are initially -1, and later set to infinity
+    char prevNode; //previous node; set at the same time as shortestDistFromSource
 };
 
 //the edges from one node to another and its weight
@@ -53,6 +53,7 @@ Plan:
     - 
 */
 
+//useless?
 struct network {
     char ID;
 
@@ -61,13 +62,16 @@ struct network {
 
     network* link;
 };
+//if the network struct goes unused remove it (it probably will go unused)
 
 //adjacency list
 adjNode *adjacencyList[23];
+//list of nodes
 node* graph[23];
 
+//return whether the passed node contains a charger
 bool checkIsCharger(char nodeID) {
-    //set nodeID to the current node ID pulled from the stream
+    //set nodeID to the ID that was passed in
     if (nodeID == 'H' || nodeID == 'K' || nodeID == 'Q' || nodeID == 'T') {
         //make it a charging station
         return true;
@@ -151,7 +155,6 @@ bool loadNetwork() {
             currentLine++;
         }
 
-
     }
     else {
         cout << "Network file not found!\n";
@@ -164,9 +167,35 @@ bool loadNetwork() {
 
 //dijkstra's algorithm; i just don't want to type that every time
 void djAlgorithm(char startPoint) {
+    //create vectors with visited and unvisited nodes (follow Lecture 9)
+    vector<char> visited; //the set of visited vertices (initially empty)
+    vector<char> unvisited; //the queue
+
     for (int i = 0; i < 23; i++) {
-        //initializar the vector of unvisited nodes
-        unvisited.push_back(i + 65);
+        //initialize the vector of unvisited nodes
+        unvisited.push_back(i + 65); //the queue initially contains all vertices
+
+        if (i + 65 == startPoint) {
+            graph[i]->shortestDistFromSource = 0; //distance to source vertex is 0
+        }
+        else {
+            graph[i]->shortestDistFromSource = INFINITY; // set all other distances to infinity (aka -1)
+        }
+    }
+    //while the queue is not empty
+    while (!unvisited.empty()) {
+
+        //select the element of [unvisited] with the min. distance
+        int nextEle;
+        int currMinDist = INFINITY;
+        for (auto t : unvisited) {
+            int distTest = graph[unvisited[t] - 65]->shortestDistFromSource;
+            if (distTest < currMinDist) {
+                currMinDist = distTest;
+            }
+        }
+
+
     }
 
     int currCost = 0;//the total weights of the edges to reach the current node 
@@ -183,7 +212,7 @@ void djAlgorithm(char startPoint) {
     }
 }
 
-//prints all data from the given line
+//prints all data from the csv file
 void printData() {
 
     for (int i = 0; i < 23;i++) {
@@ -196,8 +225,15 @@ void printData() {
         }
         cout << endl;
     }
+}
 
-
+//prints the minimum distance from the start point to each charging station; the stations are: H, K, Q, T
+void printStationCosts() {
+    cout << "Shortest distance to each station: \n";
+    cout << "H: " << graph['H' - 65]->shortestDistFromSource << endl;
+    cout << "K: " << graph['K' - 65]->shortestDistFromSource << endl;
+    cout << "Q: " << graph['Q' - 65]->shortestDistFromSource << endl;
+    cout << "T: " << graph['T' - 65]->shortestDistFromSource << endl;
 }
 
 int main()
@@ -251,6 +287,10 @@ int main()
 *   - push_back working from most optimal charging station to start point
 *   - print vector from back to front
 * 
-
+* - conflicted: have prevNode be a reference or a character?
+*   - in favor: already making an array that contains pointers
+* 
+* ... conflict ended
+   
 
 */
