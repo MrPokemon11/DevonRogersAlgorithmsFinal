@@ -19,16 +19,11 @@ int charToID(char in) {
     return out;
 }
 
-// \/ potentially unneeded? /\
-
 //convert a given index to a character
 char IDToChar(int in) {
     char out = in + 65;
     return out;
 }
-
-
-
 
 struct node {
     char id;
@@ -67,7 +62,7 @@ struct network {
 //adjacency list
 adjNode *adjacencyList[23];
 //list of nodes
-node* graph[23];
+node* networkGraph[23];
 
 //return whether the passed node contains a charger
 bool checkIsCharger(char nodeID) {
@@ -125,7 +120,7 @@ bool loadNetwork() {
             newNode->id = tempArray[0][0];
             newNode->isChargingStation = checkIsCharger(tempArray[0][0]);
 
-            graph[currentLine] = newNode;
+            networkGraph[currentLine] = newNode;
 
             for (int i = 0; i < adjTemp.size();i++) {
                 newAdj = new adjNode;
@@ -173,42 +168,57 @@ void djAlgorithm(char startPoint) {
 
     for (int i = 0; i < 23; i++) {
         //initialize the vector of unvisited nodes
-        unvisited.push_back(i + 65); //the queue initially contains all vertices
+        unvisited.push_back(IDToChar(i)); //the queue initially contains all vertices
 
-        if (i + 65 == startPoint) {
-            graph[i]->shortestDistFromSource = 0; //distance to source vertex is 0
+        if (IDToChar(i) == startPoint) {
+            networkGraph[i]->shortestDistFromSource = 0; //distance to source vertex is 0
         }
         else {
-            graph[i]->shortestDistFromSource = INFINITY; // set all other distances to infinity (aka -1)
+            networkGraph[i]->shortestDistFromSource = INFINITY; // set all other distances to infinity (aka -1)
         }
     }
     //while the queue is not empty
     while (!unvisited.empty()) {
 
         //select the element of [unvisited] with the min. distance
-        int nextEle;
+
+        int nextEle;//the index of unvisited that the next element resides at
         int currMinDist = INFINITY;
         for (auto t : unvisited) {
-            int distTest = graph[unvisited[t] - 65]->shortestDistFromSource;
+            int distTest = networkGraph[charToID(unvisited[t])]->shortestDistFromSource;
             if (distTest < currMinDist) {
                 currMinDist = distTest;
+                nextEle = t;
             }
         }
 
+        //add [nextEle] to the list of visited vertices
+        visited.push_back(unvisited[nextEle]);
 
-    }
+        //using a while loop, check each neighbor of the current element via adjacencyList
+        adjCurr = adjacencyList[charToID(unvisited[nextEle])];
+        while (adjCurr != nullptr) {
 
-    int currCost = 0;//the total weights of the edges to reach the current node 
-    int bestCost = -1;
-    bool isUnvisited = false;
-    //if a node is unvisited, make the shortest distance -1
+            //if shortestDistFromSource of the node with the ID within adjCurr is greater than the shortestDistFromSource of the node indicated by nextEle
+            // plus the cost within adjCurr, set the shortestDistFromSource within the node with the id within adjCurr to to shortestDistFromSource of the node indicated by nextEle
+            // plus the cost within adjCurr and set the prevNode of the node referenced by adjCurr to the node referenced by nextEle
 
+            //reminder (remove this lineafter this section is done): id is a character, cost is an int
 
-    //check
-    if (currCost < bestCost || isUnvisited) {
-        bestCost = currCost;//since this is the shortest path so far, make it the best cost
+            //if new shortest path found
+            if (networkGraph[charToID(adjCurr->id)]->shortestDistFromSource > networkGraph[charToID(unvisited[nextEle])]->shortestDistFromSource + adjCurr->cost) {
+               //set new value of shortest path
+                networkGraph[charToID(adjCurr->id)]->shortestDistFromSource = networkGraph[charToID(unvisited[nextEle])]->shortestDistFromSource + adjCurr->cost;
+                //update the previous vertex
+                networkGraph[charToID(adjCurr->id)]->prevNode = networkGraph[charToID(unvisited[nextEle])]->id;
+                adjCurr = adjCurr->link;
+            }
 
-        //update the value of prevNode
+        }
+        
+        //we won't visit [nextEle] again
+        unvisited.erase(unvisited.begin() + nextEle);
+        
     }
 }
 
@@ -228,12 +238,12 @@ void printData() {
 }
 
 //prints the minimum distance from the start point to each charging station; the stations are: H, K, Q, T
-void printStationCosts() {
-    cout << "Shortest distance to each station: \n";
-    cout << "H: " << graph['H' - 65]->shortestDistFromSource << endl;
-    cout << "K: " << graph['K' - 65]->shortestDistFromSource << endl;
-    cout << "Q: " << graph['Q' - 65]->shortestDistFromSource << endl;
-    cout << "T: " << graph['T' - 65]->shortestDistFromSource << endl;
+void printStationCosts(char start) {
+    cout << "Shortest distance to each station from Node " << start <<": \n";
+    cout << "H: " << networkGraph[charToID('H')]->shortestDistFromSource << endl;
+    cout << "K: " << networkGraph[charToID('K')]->shortestDistFromSource << endl;
+    cout << "Q: " << networkGraph[charToID('Q')]->shortestDistFromSource << endl;
+    cout << "T: " << networkGraph[charToID('T')]->shortestDistFromSource << endl;
 }
 
 int main()
@@ -260,10 +270,13 @@ int main()
             continue;
         }
 
-        //note: if the source node *is* a charging station, you still need to find the distance to the other 3 '-_-
+        //note: if the source node *is* a charging station, you still need to find the distance to the other 3 '-_- (remember to remove this comment)
 
         //run djikstra's algorithm
         djAlgorithm(ans);
+
+        //print the cost to travel from the starting node to each charging station
+        printStationCosts(ans);
 
         //if the user is done, end the program
         cout << "Would you like to test another starting point? Y/N ";
@@ -276,7 +289,7 @@ int main()
         std::cout << "See you next time!\n";
     }
     else {
-        cout << "Make sure that DevonRogersAlgorithmsFinalSpreadsheet.csv exists and please try again.\n";
+        cout << "Please make sure that DevonRogersAlgorithmsFinalSpreadsheet.csv exists and try again.\n";
     }
 
 }
