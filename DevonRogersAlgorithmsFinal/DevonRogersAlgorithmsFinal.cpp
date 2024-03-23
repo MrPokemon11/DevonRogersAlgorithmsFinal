@@ -1,13 +1,12 @@
 // DevonRogersAlgorithmsFinal.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <iomanip>
-#include <fstream>
-#include <chrono>
+#include <iostream> //used for console interaction
+#include <vector> //used for data storage
+#include <string> //used for the strings
+#include <sstream> //used to split strings into smaller strings
+#include <fstream> //used to read files
+#include <chrono> //used for timing
 
 using namespace std;
 
