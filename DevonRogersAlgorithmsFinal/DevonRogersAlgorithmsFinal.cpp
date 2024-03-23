@@ -39,10 +39,16 @@ struct adjNode {
 	adjNode* link; //the next edge in alphabetical order by destination
 };
 
-//adjacency list
-adjNode* adjacencyList[23];
-//list of nodes
-node* networkGraph[23];
+//the graph
+struct network {
+	//adjacency list
+	adjNode* adjacencyList[23];
+	//list of nodes
+	node* networkGraph[23];
+};
+
+//initiallize the graph
+network graph;
 
 //return whether the passed node contains a charger
 bool checkIsCharger(char nodeID) {
@@ -101,7 +107,7 @@ bool loadNetwork() {
 			newNode->id = tempArray[0][0]; //set the id of newNode to the first section of the current line of the file
 			newNode->isChargingStation = checkIsCharger(tempArray[0][0]); //set isChargingStation equal to the return value
 
-			networkGraph[currentLine] = newNode; //add newNode to the networkGraph array at index "currentLine"
+			graph.networkGraph[currentLine] = newNode; //add newNode to the networkGraph array at index "currentLine"
 
 			//for each neihbouring node:
 			for (int i = 0; i < adjTemp.size();i++) {
@@ -124,8 +130,8 @@ bool loadNetwork() {
 					adjLast = newAdj;
 				}
 			}
-			//set the pointer at index currentLine of the array adjacencyList to equal adjFirst
-			adjacencyList[currentLine] = adjFirst;
+			//set the pointer at index currentLine of the array graph.adjacencyList to equal adjFirst
+			graph.adjacencyList[currentLine] = adjFirst;
 
 			//reset adjFirst and adjLast to a null pointer to prevent memory leakage due to reused pointers
 			adjFirst = nullptr;
@@ -159,10 +165,10 @@ void dijkstrasAlgorithm(char startPoint) {
 		unvisited.push_back(i + 65); //the queue initially contains all vertices
 
 		if (IDToChar(i) == startPoint) {
-			networkGraph[i]->shortestDistFromSource = 0; //distance to source vertex is 0
+			graph.networkGraph[i]->shortestDistFromSource = 0; //distance to source vertex is 0
 		}
 		else {
-			networkGraph[i]->shortestDistFromSource = 999999; // set all other distances to 999999 (a ridiculously high number, because INFINITY wasn't cooperating
+			graph.networkGraph[i]->shortestDistFromSource = 999999; // set all other distances to 999999 (a ridiculously high number, because INFINITY wasn't cooperating
 		}
 	}
 	//while the queue is not empty
@@ -172,7 +178,7 @@ void dijkstrasAlgorithm(char startPoint) {
 		int nextEle = NULL; //the index of "unvisited" that the next element resides at
 		int currMinDist = 999999; //set the current minimum distance to be very high
 		for (int t = 0; t < unvisited.size(); t++) {
-			int distTest = networkGraph[charToID(unvisited[t])]->shortestDistFromSource;
+			int distTest = graph.networkGraph[charToID(unvisited[t])]->shortestDistFromSource;
 			if (distTest < currMinDist) {
 				currMinDist = distTest;
 				nextEle = t;
@@ -182,8 +188,8 @@ void dijkstrasAlgorithm(char startPoint) {
 		//add [nextEle] to the list of visited vertices
 		visited.push_back(unvisited[nextEle]);
 
-		//using a while loop, check each neighbor of the current element via adjacencyList
-		adjCurr = adjacencyList[charToID(unvisited[nextEle])];
+		//using a while loop, check each neighbor of the current element via graph.adjacencyList
+		adjCurr = graph.adjacencyList[charToID(unvisited[nextEle])];
 		while (adjCurr != nullptr) {
 
 			//how the below if statement works: 
@@ -192,11 +198,11 @@ void dijkstrasAlgorithm(char startPoint) {
 			// plus the cost within adjCurr and set the prevNode of the node referenced by adjCurr to the node referenced by nextEle
 
 			//if new shortest path found
-			if (networkGraph[charToID(adjCurr->id)]->shortestDistFromSource > networkGraph[charToID(unvisited[nextEle])]->shortestDistFromSource + adjCurr->cost) {
+			if (graph.networkGraph[charToID(adjCurr->id)]->shortestDistFromSource > graph.networkGraph[charToID(unvisited[nextEle])]->shortestDistFromSource + adjCurr->cost) {
 				//set new value of shortest path
-				networkGraph[charToID(adjCurr->id)]->shortestDistFromSource = networkGraph[charToID(unvisited[nextEle])]->shortestDistFromSource + adjCurr->cost;
+				graph.networkGraph[charToID(adjCurr->id)]->shortestDistFromSource = graph.networkGraph[charToID(unvisited[nextEle])]->shortestDistFromSource + adjCurr->cost;
 				//update the previous vertex
-				networkGraph[charToID(adjCurr->id)]->prevNode = networkGraph[charToID(unvisited[nextEle])]->id;
+				graph.networkGraph[charToID(adjCurr->id)]->prevNode = graph.networkGraph[charToID(unvisited[nextEle])]->id;
 
 			}
 			//advance pointer
@@ -219,8 +225,8 @@ void dijkstrasAlgorithm(char startPoint) {
 void printData() {
 
 	for (int i = 0; i < 23;i++) {
-		//set adjCurr to the pointer at the current index of adjacencyList
-		adjCurr = adjacencyList[i];
+		//set adjCurr to the pointer at the current index of graph.adjacencyList
+		adjCurr = graph.adjacencyList[i];
 
 		//while there are still neighbors to print
 		while (adjCurr != NULL) {
@@ -234,10 +240,10 @@ void printData() {
 //prints the minimum distance from the start point to each charging station; the stations are: H, K, Q, T
 void printStationCosts(char start) {
 	cout << "Shortest distance to each station from Node " << start << ": \n";
-	cout << "H: " << networkGraph[charToID('H')]->shortestDistFromSource << endl;
-	cout << "K: " << networkGraph[charToID('K')]->shortestDistFromSource << endl;
-	cout << "Q: " << networkGraph[charToID('Q')]->shortestDistFromSource << endl;
-	cout << "T: " << networkGraph[charToID('T')]->shortestDistFromSource << endl;
+	cout << "H: " << graph.networkGraph[charToID('H')]->shortestDistFromSource << endl;
+	cout << "K: " << graph.networkGraph[charToID('K')]->shortestDistFromSource << endl;
+	cout << "Q: " << graph.networkGraph[charToID('Q')]->shortestDistFromSource << endl;
+	cout << "T: " << graph.networkGraph[charToID('T')]->shortestDistFromSource << endl;
 	cout << endl;
 }
 
@@ -247,22 +253,22 @@ void printMostEfficientRoute() {
 	for (int n = 0; n < 3; n++) {
 		//if the shortest distance from the source to the current most efficient is greater than that of the station at index n in stations, set mostEfficient to the station at index n
 		int netIndex = charToID(stations[n]);
-		if (networkGraph[charToID(mostEfficient)]->shortestDistFromSource > networkGraph[netIndex]->shortestDistFromSource) {
+		if (graph.networkGraph[charToID(mostEfficient)]->shortestDistFromSource > graph.networkGraph[netIndex]->shortestDistFromSource) {
 			mostEfficient = stations[n];
 		}
 	}
 
 	vector<char> mostEfficientRoute; //the most efficient route to take, from end to start
 	mostEfficientRoute.push_back(mostEfficient); //add the closest station
-	int distCheck = networkGraph[charToID(mostEfficient)]->shortestDistFromSource; //set distCheck to the distance from the charging station to the starting point
+	int distCheck = graph.networkGraph[charToID(mostEfficient)]->shortestDistFromSource; //set distCheck to the distance from the charging station to the starting point
 	//while you have not yet reached the start point
 	while (distCheck > 0) {
 		char curr = mostEfficientRoute.back(); //set the current node to the last one in the list
-		char next = networkGraph[charToID(curr)]->prevNode; //set the next node to the node before the current node 
+		char next = graph.networkGraph[charToID(curr)]->prevNode; //set the next node to the node before the current node 
 
 		mostEfficientRoute.push_back(next); //add the next node to the most efficient route
 
-		distCheck = networkGraph[charToID(next)]->shortestDistFromSource; //update distCheck
+		distCheck = graph.networkGraph[charToID(next)]->shortestDistFromSource; //update distCheck
 	}
 
 	cout << "Most efficient route: ";
