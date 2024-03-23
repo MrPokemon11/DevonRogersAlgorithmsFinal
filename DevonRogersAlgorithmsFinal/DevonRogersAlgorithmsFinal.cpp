@@ -8,11 +8,13 @@
 #include <iomanip>
 #include <fstream>
 #include <chrono>
-#include <map>
+#include <map> // unneeded? (remove line if unused, otherwise remove this comment)
 
 using namespace std;
 
 //create vectors with visited and unvisited nodes (follow Lecture 9)
+vector<char> visited;
+vector<char> unvisited;
 
 struct node {
     char id;
@@ -132,7 +134,7 @@ void loadNetwork() {
 
     }
     else {
-        cout << "Network not found!\n";
+        cout << "Network file not found!\n";
     }
 
 }
@@ -140,7 +142,12 @@ void loadNetwork() {
 //reminder to self: look at the pseudocode in lecture 10, should be very helpful
 
 //dijkstra's algorithm; i just don't want to type that every time
-void djAlgorithm() {
+void djAlgorithm(char startPoint) {
+    for (int i = 0; i < 23; i++) {
+        //initializar the vector of unvisited nodes
+        unvisited.push_back(i + 65);
+    }
+
     int currCost = 0;//the total weights of the edges to reach the current node 
     int bestCost = -1;
     bool isUnvisited = false;
@@ -181,20 +188,34 @@ int main()
     printData();
 
 
-    //get source node
+    bool running = true;
+    while (running) {
+     //get source node
+        cout << "Please enter the starting point: ";
+        char ans;
+        cin >> ans;
+
+        ans = toupper(ans);
+        if (ans < 'A' || ans > 'W') {
+            cout << "That's is not a valid node! Valid nodes are anything from A to W.\n";
+        }
+
+    }
+
+   
+
 
     //if the source node *is* a charging station, you still need to find the distance to the other 3 '-_-
 
-    std::cout << "Hello World!\n";
+    std::cout << "See you next time!\n";
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+/* Personal notes
+* - optimal path output "pseudocode"
+*   - make vector of characters
+*   - push_back working from most optimal charging station to start point
+*   - print vector from back to front
+* 
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+
+*/
