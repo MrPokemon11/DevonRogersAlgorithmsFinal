@@ -269,17 +269,19 @@ void printMostEfficientRoute() {
         }
     }
 
+
+
     vector<char> mostEfficientRoute;
     mostEfficientRoute.push_back(mostEfficient);
     int distCheck = networkGraph[charToID(mostEfficient)]->shortestDistFromSource;
-    do {
+     while (distCheck > 0){
         char curr = mostEfficientRoute.back();
         char next = networkGraph[charToID(curr)]->prevNode;
 
         mostEfficientRoute.push_back(next);
 
         distCheck = networkGraph[charToID(next)]->shortestDistFromSource;
-    } while (distCheck > 0);
+    } 
 
     cout << "Most efficient route: ";
 
@@ -329,7 +331,7 @@ int main()
         //if the user is done, end the program
         cout << "Would you like to test another starting point? Y/N ";
         cin >> ans;
-        if (toupper(ans) != 'y') {
+        if (toupper(ans) != 'Y') {
             running = false;
         }
     }
